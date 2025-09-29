@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "iCanGrow Suppliers API",
+    "description": "Collection for testing supplier management APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supplierId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "List Suppliers",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/suppliers?searchTerm=&status=all&supplier_type=all&approval_status=all",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers"],
+          "query": [
+            { "key": "searchTerm", "value": "" },
+            { "key": "status", "value": "all" },
+            { "key": "supplier_type", "value": "all" },
+            { "key": "approval_status", "value": "all" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Supplier Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/suppliers/{{supplierId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers", "{{supplierId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create Supplier",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Company Name\",\n  \"email\": \"email@example.com\",\n  \"phone\": \"1234567890\",\n  \"address\": \"Address\",\n  \"contact_person\": \"Contact Name\",\n  \"license_number\": \"License123\",\n  \"supplier_type\": \"equipment\",\n  \"payment_terms\": \"Net 30\",\n  \"notes\": \"Some notes\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/suppliers",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers"]
+        }
+      }
+    },
+    {
+      "name": "Update Supplier",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Name\",\n  \"email\": \"updated@example.com\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/suppliers/{{supplierId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers", "{{supplierId}}"]
+        }
+      }
+    },
+    {
+      "name": "Approve/Reject Supplier",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"approved\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/suppliers/{{supplierId}}/approve",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers", "{{supplierId}}", "approve"]
+        }
+      }
+    },
+    {
+      "name": "Archive Supplier",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/suppliers/{{supplierId}}/archive",
+          "host": ["{{baseUrl}}"],
+          "path": ["suppliers", "{{supplierId}}", "archive"]
+        }
+      }
+    }
+  ]
+}
+

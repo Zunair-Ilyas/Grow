@@ -1,0 +1,740 @@
+{
+    "info": {
+        "_postman_id": "audit-api-collection",
+        "name": "iCanGrow Audit Management API",
+        "description": "Complete API collection for Audit Management system including internal audits, audit findings, and supplier audits",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\",\n  \"full_name\": \"{{full_name}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Internal Audits",
+            "item": [
+                {
+                    "name": "List Audits",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits?page=1&limit=10&status=scheduled&type=internal",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "scheduled"
+                                },
+                                {
+                                    "key": "type",
+                                    "value": "internal"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Audit by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Audit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Monthly Quality Audit\",\n  \"type\": \"internal\",\n  \"auditor\": \"John Doe\",\n  \"status\": \"scheduled\",\n  \"scheduled_date\": \"2024-02-15\",\n  \"scope\": \"Quality management system review\",\n  \"location\": \"Main Facility\",\n  \"batch_id\": \"{{batch_id}}\",\n  \"cycle_id\": \"{{cycle_id}}\",\n  \"notes\": \"Monthly compliance audit\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Audit",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Monthly Quality Audit - Updated\",\n  \"status\": \"in_progress\",\n  \"notes\": \"Audit in progress - updated notes\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Audit",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Start Audit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}/start",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}",
+                                "start"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Complete Audit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"completed_date\": \"2024-02-15\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}",
+                                "complete"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Cancel Audit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"reason\": \"Equipment malfunction - reschedule required\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}",
+                                "cancel"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Audit Findings",
+            "item": [
+                {
+                    "name": "Get Audit Findings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}/findings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}",
+                                "findings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Audit Finding",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"audit_type\": \"internal\",\n  \"finding_type\": \"observation\",\n  \"title\": \"Temperature monitoring issue\",\n  \"description\": \"Temperature sensors not calibrated properly\",\n  \"evidence\": \"Sensor readings show 2°C deviation\",\n  \"requirement_reference\": \"ISO 9001:2015 - 7.1.5\",\n  \"batch_id\": \"{{batch_id}}\",\n  \"assigned_to\": \"{{user_id}}\",\n  \"due_date\": \"2024-02-20\",\n  \"corrective_action\": \"Calibrate all temperature sensors\",\n  \"verification_method\": \"Third-party calibration certificate\",\n  \"status\": \"open\",\n  \"auditor_name\": \"John Doe\",\n  \"audit_date\": \"2024-02-15\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/{{audit_id}}/findings",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "{{audit_id}}",
+                                "findings"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Audit Finding",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"closed\",\n  \"corrective_action\": \"All temperature sensors calibrated and verified\",\n  \"verified_by\": \"{{user_id}}\",\n  \"verified_at\": \"2024-02-18T10:00:00Z\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/findings/{{finding_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "findings",
+                                "{{finding_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Audit Finding",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/findings/{{finding_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "findings",
+                                "{{finding_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Supplier Audits",
+            "item": [
+                {
+                    "name": "List Supplier Audits",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/suppliers?page=1&limit=10&status=scheduled&audit_type=qualification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "suppliers"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "scheduled"
+                                },
+                                {
+                                    "key": "audit_type",
+                                    "value": "qualification"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Supplier Audit by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/suppliers/{{supplier_audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "suppliers",
+                                "{{supplier_audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Supplier Audit",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"supplier_id\": \"{{supplier_id}}\",\n  \"audit_type\": \"qualification\",\n  \"audit_date\": \"2024-02-20\",\n  \"auditor\": \"{{user_id}}\",\n  \"status\": \"scheduled\",\n  \"score\": 85,\n  \"findings_count\": 3,\n  \"critical_findings\": 1,\n  \"next_audit_date\": \"2025-02-20\",\n  \"certificate_issued\": false,\n  \"notes\": \"Initial supplier qualification audit\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/suppliers",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "suppliers"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Supplier Audit",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"completed\",\n  \"score\": 92,\n  \"certificate_issued\": true,\n  \"certificate_expiry\": \"2025-02-20\",\n  \"report_url\": \"https://example.com/audit-report.pdf\",\n  \"notes\": \"Audit completed successfully with minor findings\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/suppliers/{{supplier_audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "suppliers",
+                                "{{supplier_audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Supplier Audit",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/suppliers/{{supplier_audit_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "suppliers",
+                                "{{supplier_audit_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Audit Reports",
+            "item": [
+                {
+                    "name": "Get Audit Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/audits/reports/summary",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "audits",
+                                "reports",
+                                "summary"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-login if no token exists",
+                    "if (!pm.environment.get('access_token')) {",
+                    "    pm.sendRequest({",
+                    "        url: pm.environment.get('base_url') + '/api/v1/auth/login',",
+                    "        method: 'POST',",
+                    "        header: {",
+                    "            'Content-Type': 'application/json'",
+                    "        },",
+                    "        body: {",
+                    "            mode: 'raw',",
+                    "            raw: JSON.stringify({",
+                    "                email: pm.environment.get('email'),",
+                    "                password: pm.environment.get('password')",
+                    "            })",
+                    "        }",
+                    "    }, function (err, response) {",
+                    "        if (response && response.json() && response.json().data && response.json().data.access_token) {",
+                    "            pm.environment.set('access_token', response.json().data.access_token);",
+                    "        }",
+                    "    });",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "email",
+            "value": "admin@icangrow.com",
+            "type": "string"
+        },
+        {
+            "key": "password",
+            "value": "password123",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "audit_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "finding_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "supplier_audit_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "supplier_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "batch_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "cycle_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

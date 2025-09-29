@@ -1,0 +1,1196 @@
+{
+    "info": {
+        "_postman_id": "erp-api-collection",
+        "name": "iCanGrow ERP API",
+        "description": "Complete ERP API endpoints for iCanGrow cannabis cultivation management system",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{access_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-refresh token if needed",
+                    "if (!pm.environment.get('access_token')) {",
+                    "    console.log('No access token found. Please login first.');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test script for ERP endpoints",
+                    "pm.test('Response time is less than 5000ms', function () {",
+                    "    pm.expect(pm.response.responseTime).to.be.below(5000);",
+                    "});",
+                    "",
+                    "pm.test('Response has success field', function () {",
+                    "    const jsonData = pm.response.json();",
+                    "    pm.expect(jsonData).to.have.property('success');",
+                    "});"
+                ]
+            }
+        }
+    ],
+    "item": [
+        {
+            "name": "ERP Batches",
+            "item": [
+                {
+                    "name": "List Batches",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/batches?page=1&limit=10&stage=vegetative&location_id=1&strain_name=Blue Dream",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "batches"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "stage",
+                                    "value": "vegetative",
+                                    "description": "Filter by growth stage",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "location_id",
+                                    "value": "1",
+                                    "description": "Filter by location ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "strain_name",
+                                    "value": "Blue Dream",
+                                    "description": "Filter by strain name",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Batch by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/batches/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "batches",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Batch",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Batch A\",\n  \"strain\": \"Blue Dream\",\n  \"strain_id\": \"{{strain_id}}\",\n  \"cycle_id\": \"{{growth_cycle_id}}\",\n  \"room\": \"Flower Room 1\",\n  \"plant_count\": 50,\n  \"start_date\": \"2024-01-15\",\n  \"expected_harvest_date\": \"2024-04-15\",\n  \"notes\": \"First batch of Blue Dream for Q1 2024\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/batches",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "batches"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "        pm.environment.set('batch_id', jsonData.data.id);",
+                                    "        console.log('Batch ID saved:', jsonData.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Batch",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_stage\": \"flowering\",\n  \"plant_count\": 48,\n  \"strain\": \"Blue Dream\",\n  \"strain_id\": \"{{strain_id}}\",\n  \"notes\": \"Updated: 2 plants removed due to issues\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/batches/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "batches",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Batch",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/batches/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "batches",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ERP Daily Logs",
+            "item": [
+                {
+                    "name": "List Daily Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/daily_logs?page=1&limit=10&batch_id={{batch_id}}&date_from=2024-01-01&date_to=2024-01-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "daily_logs"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "description": "Filter by batch ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_from",
+                                    "value": "2024-01-01",
+                                    "description": "Start date filter",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2024-01-31",
+                                    "description": "End date filter",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Daily Log by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/daily_logs/{{daily_log_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "daily_logs",
+                                "{{daily_log_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Daily Log",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"batch_id\": \"{{batch_id}}\",\n  \"date\": \"2024-01-20\",\n  \"stage\": \"vegetative\",\n  \"temperature\": 24.5,\n  \"humidity\": 65,\n  \"ph_level\": 6.2,\n  \"notes\": \"Plants looking healthy, slight yellowing on lower leaves\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/daily_logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "daily_logs"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "        pm.environment.set('daily_log_id', jsonData.data.id);",
+                                    "        console.log('Daily Log ID saved:', jsonData.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Daily Log",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"temperature\": 25.0,\n  \"humidity\": 68,\n  \"ph_level\": 6.3,\n  \"notes\": \"Updated: Increased humidity slightly, plants responding well\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/daily_logs/{{daily_log_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "daily_logs",
+                                "{{daily_log_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ERP Packaging",
+            "item": [
+                {
+                    "name": "List Packaging Runs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/packaging?page=1&limit=10&batch_id={{batch_id}}&status=approved",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "packaging"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "description": "Filter by batch ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "approved",
+                                    "description": "Filter by approval status",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Packaging by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/packaging/{{packaging_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "packaging",
+                                "{{packaging_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Packaging Run",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"batch_id\": \"{{batch_id}}\",\n  \"package_type\": \"pre-roll\",\n  \"package_size\": \"1g\",\n  \"quantity_packaged\": 100,\n  \"packaging_date\": \"2024-01-25\",\n  \"lot_number\": \"PR-2024-001\",\n  \"notes\": \"Pre-roll packaging for Blue Dream batch\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/packaging",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "packaging"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "        pm.environment.set('packaging_id', jsonData.data.id);",
+                                    "        console.log('Packaging ID saved:', jsonData.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ERP Finished Goods",
+            "item": [
+                {
+                    "name": "List Finished Goods",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/finished_goods?page=1&limit=10&strain_name=Blue Dream&qa_status=approved",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "finished_goods"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "strain_name",
+                                    "value": "Blue Dream",
+                                    "description": "Filter by strain name",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "qa_status",
+                                    "value": "approved",
+                                    "description": "Filter by QA status",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Finished Good by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/finished_goods/{{finished_goods_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "finished_goods",
+                                "{{finished_goods_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Finished Goods",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"current_stock\": 85,\n  \"unit_price\": 12.50,\n  \"last_updated\": \"2024-01-25T10:30:00Z\",\n  \"notes\": \"Updated stock after sales, price adjusted for market\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/finished_goods/{{finished_goods_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "finished_goods",
+                                "{{finished_goods_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ERP Waste Management",
+            "item": [
+                {
+                    "name": "List Waste Records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/waste?page=1&limit=10&batch_id={{batch_id}}&waste_type=plant_material",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "waste"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "description": "Filter by batch ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "waste_type",
+                                    "value": "plant_material",
+                                    "description": "Filter by waste type",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Waste Record by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/waste/{{waste_record_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "waste",
+                                "{{waste_record_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Waste Record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"batch_id\": \"{{batch_id}}\",\n  \"waste_type\": \"plant_material\",\n  \"quantity\": 2.5,\n  \"unit\": \"kg\",\n  \"disposal_date\": \"2024-01-25\",\n  \"disposal_method\": \"compost\",\n  \"reason\": \"Diseased plant material removed during inspection\",\n  \"notes\": \"Material properly composted according to regulations\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/waste",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "waste"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "        pm.environment.set('waste_record_id', jsonData.data.id);",
+                                    "        console.log('Waste Record ID saved:', jsonData.data.id);",
+                                    "    }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ERP Review Stage",
+            "item": [
+                {
+                    "name": "Get Batch Record for Review",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/review/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "review",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Review and Close Batch",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"qa_status\": \"approved\",\n  \"final_quality_score\": 8.5,\n  \"thc_percentage\": 22.3,\n  \"cbd_percentage\": 0.8,\n  \"moisture_content\": 12.5,\n  \"review_notes\": \"Batch meets all quality standards. THC levels within expected range. Ready for packaging.\",\n  \"reviewer_comments\": \"Excellent batch quality, consistent throughout. Recommend for premium tier.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/review/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "review",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ERP Strains",
+            "item": [
+                {
+                    "name": "List Strains",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/strains?page=1&limit=10&q=blue&is_active=true",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "strains"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "blue",
+                                    "description": "Search by name",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "is_active",
+                                    "value": "true",
+                                    "description": "Filter by active",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Strain by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/strains/{{strain_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "strains",
+                                "{{strain_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Strain",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Blue Dream\",\n  \"genetics\": \"Blueberry x Haze\",\n  \"flowering_time_days\": 63,\n  \"description\": \"Popular hybrid\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/strains",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "strains"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "  const jsonData = pm.response.json();",
+                                    "  if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('strain_id', jsonData.data.id);",
+                                    "    console.log('Strain ID saved:', jsonData.data.id);",
+                                    "  }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Strain",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"description\": \"Updated description\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/strains/{{strain_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "strains",
+                                "{{strain_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Strain",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/strains/{{strain_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "strains",
+                                "{{strain_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "ERP Growth Cycles",
+            "item": [
+                {
+                    "name": "List Growth Cycles",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/growth_cycles?page=1&limit=10&status=active&q=summer&start_date_from=2024-01-01&start_date_to=2024-12-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "growth_cycles"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "active",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "summer",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "start_date_from",
+                                    "value": "2024-01-01",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "start_date_to",
+                                    "value": "2024-12-31",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Growth Cycle by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/growth_cycles/{{growth_cycle_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "growth_cycles",
+                                "{{growth_cycle_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Growth Cycle",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Summer Cycle\",\n  \"start_date\": \"2024-06-01\",\n  \"end_date\": null,\n  \"strain_ids\": [\"{{strain_id}}\"],\n  \"facility_location\": \"Greenhouse A\",\n  \"status\": \"planning\",\n  \"notes\": \"Trialing new nutrients\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/growth_cycles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "growth_cycles"
+                            ]
+                        }
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "  const jsonData = pm.response.json();",
+                                    "  if (jsonData.success && jsonData.data && jsonData.data.id) {",
+                                    "    pm.environment.set('growth_cycle_id', jsonData.data.id);",
+                                    "    console.log('Growth Cycle ID saved:', jsonData.data.id);",
+                                    "  }",
+                                    "}"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Growth Cycle",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"active\",\n  \"notes\": \"Started on schedule\",\n  \"strain_ids\": [\"{{strain_id}}\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/growth_cycles/{{growth_cycle_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "growth_cycles",
+                                "{{growth_cycle_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Growth Cycle",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/erp/growth_cycles/{{growth_cycle_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "erp",
+                                "growth_cycles",
+                                "{{growth_cycle_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}

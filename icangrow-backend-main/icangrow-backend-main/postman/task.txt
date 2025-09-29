@@ -1,0 +1,1059 @@
+heres the frontend code: import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase-client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Package, Download, Search, Filter, MoreHorizontal, Eye, Edit, AlertTriangle, CheckCircle, ExternalLink, Clock, AlertCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+
+interface InventoryLot {
+  id: string;
+  lot_code: string;
+  product_name: string;
+  product_type: string;
+  strain: string;
+  stage: string;
+  status: string;
+  facility: string;
+  quantity: number;
+  unit_of_measure: string;
+  expiry_date: string | null;
+  coa_approved: boolean;
+  coa_record_id: string | null;
+  batch_id: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface BatchInfo {
+  id: string;
+  name: string;
+  strain: string;
+  current_stage: string;
+  start_date: string;
+  plant_count: number;
+  progress: number;
+  status: string;
+}
+
+interface BatchStage {
+  id: string;
+  stage_id: string;
+  status: string;
+  started_at: string | null;
+  completed_at: string | null;
+  stage_name: string;
+  stage_weight: number | null;
+}
+
+interface DailyLog {
+  id: string;
+  date: string;
+  stage: string;
+  temperature: number | null;
+  humidity: number | null;
+  plant_count: number | null;
+  observations: string | null;
+  logged_by: string;
+}
+
+interface StockMovement {
+  id: string;
+  movement_type: string;
+  quantity: number;
+  unit_of_measure: string;
+  from_facility: string | null;
+  to_facility: string | null;
+  reference_type: string | null;
+  reason: string | null;
+  created_at: string;
+}
+
+interface StockLevel {
+  available_quantity: number;
+  reserved_quantity: number;
+}
+
+const Inventory = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [facilityFilter, setFacilityFilter] = useState('all');
+  const [productTypeFilter, setProductTypeFilter] = useState('all');
+  const [stageFilter, setStageFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedLot, setSelectedLot] = useState<string | null>(null);
+  const [adjustmentDialog, setAdjustmentDialog] = useState(false);
+  const [adjustmentQuantity, setAdjustmentQuantity] = useState('');
+  const [adjustmentReason, setAdjustmentReason] = useState('');
+
+  // Fetch inventory lots with stock levels
+  const { data: inventory = [], isLoading, refetch, error: queryError } = useQuery({
+    queryKey: ['inventory-lots'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('inventory_lots')
+        .select(`
+          *,
+          stock_levels(available_quantity, reserved_quantity),
+          coa_records(lab_name, test_date, thc_percentage, cbd_percentage)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Inventory query error:', error);
+        throw error;
+      }
+      
+      console.log('Inventory data loaded:', data?.length || 0, 'lots');
+      return data as (InventoryLot & { 
+        stock_levels: StockLevel[]; 
+        coa_records?: { lab_name: string; test_date: string; thc_percentage: number; cbd_percentage: number } | null;
+      })[];
+    },
+  });
+
+  // Fetch selected lot details
+  const { data: lotDetail } = useQuery({
+    queryKey: ['lot-detail', selectedLot],
+    queryFn: async () => {
+      if (!selectedLot) return null;
+      
+      const { data, error } = await supabase
+        .from('inventory_lots')
+        .select(`
+          *,
+          stock_levels!inner(available_quantity, reserved_quantity),
+          coa_records(lab_name, test_date, thc_percentage, cbd_percentage)
+        `)
+        .eq('id', selectedLot)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedLot,
+  });
+
+  // Fetch batch traceability info
+  const { data: batchInfo } = useQuery({
+    queryKey: ['batch-info', lotDetail?.batch_id],
+    queryFn: async () => {
+      if (!lotDetail?.batch_id) return null;
+      
+      const { data, error } = await supabase
+        .from('batches')
+        .select('*')
+        .eq('id', lotDetail.batch_id)
+        .single();
+
+      if (error) throw error;
+      return data as BatchInfo;
+    },
+    enabled: !!lotDetail?.batch_id,
+  });
+
+  // Fetch batch stages
+  const { data: batchStages = [] } = useQuery({
+    queryKey: ['batch-stages', lotDetail?.batch_id],
+    queryFn: async () => {
+      if (!lotDetail?.batch_id) return [];
+      
+      const { data, error } = await supabase
+        .from('batch_stages')
+        .select(`
+          *,
+          stages(name)
+        `)
+        .eq('batch_id', lotDetail.batch_id)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      return data.map(stage => ({
+        ...stage,
+        stage_name: stage.stages?.name || 'Unknown'
+      })) as BatchStage[];
+    },
+    enabled: !!lotDetail?.batch_id,
+  });
+
+  // Fetch recent daily logs
+  const { data: dailyLogs = [] } = useQuery({
+    queryKey: ['daily-logs', lotDetail?.batch_id],
+    queryFn: async () => {
+      if (!lotDetail?.batch_id) return [];
+      
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .select('*')
+        .eq('batch_id', lotDetail.batch_id)
+        .order('date', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+      return data as DailyLog[];
+    },
+    enabled: !!lotDetail?.batch_id,
+  });
+
+  // Fetch movements for selected lot
+  const { data: movements = [] } = useQuery({
+    queryKey: ['stock-movements', selectedLot],
+    queryFn: async () => {
+      if (!selectedLot) return [];
+      
+      const { data, error } = await supabase
+        .from('stock_movements')
+        .select('*')
+        .eq('lot_id', selectedLot)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data as StockMovement[];
+    },
+    enabled: !!selectedLot,
+  });
+
+  // Filter inventory - only show packaging stage (not harvest), quarantine is OK
+  const filteredInventory = inventory.filter((lot) => {
+    const matchesSearch = 
+      lot.lot_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lot.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lot.strain.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesFacility = facilityFilter === 'all' || lot.facility === facilityFilter;
+    const matchesProductType = productTypeFilter === 'all' || lot.product_type === productTypeFilter;
+    const matchesStage = stageFilter === 'all' || lot.stage === stageFilter;
+    const matchesStatus = statusFilter === 'all' || lot.status === statusFilter;
+
+    // Only show packaging stage items (not harvest), but quarantine status is allowed
+    const isPackagingStage = lot.stage === 'packaging';
+
+    return matchesSearch && matchesFacility && matchesProductType && matchesStage && matchesStatus && isPackagingStage;
+  });
+
+  // Get available quantity for a lot
+  const getAvailableQuantity = (lot: InventoryLot & { stock_levels: StockLevel[] }) => {
+    return lot.stock_levels[0]?.available_quantity || 0;
+  };
+
+  // Check if lot is dispatch ready
+  const isDispatchReady = (lot: InventoryLot) => {
+    const available = getAvailableQuantity(lot as any);
+    return lot.stage === 'packaging' && lot.status === 'approved' && lot.coa_approved && available > 0;
+  };
+
+  // Check if lot is approaching expiry (within 30 days)
+  const isApproachingExpiry = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    const expiry = new Date(expiryDate);
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  };
+
+  // Check if lot is expired
+  const isExpired = (expiryDate: string | null) => {
+    if (!expiryDate) return false;
+    return new Date(expiryDate) < new Date();
+  };
+
+  // Get stage badge color
+  const getStageBadge = (stage: string) => {
+    const colors = {
+      harvest: 'bg-amber-100 text-amber-800',
+      cure: 'bg-orange-100 text-orange-800',
+      packaging: 'bg-green-100 text-green-800',
+    };
+    return colors[stage as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Get status badge color
+  const getStatusBadge = (status: string) => {
+    const colors = {
+      available: 'bg-blue-100 text-blue-800',
+      quarantine: 'bg-red-100 text-red-800',
+      expired: 'bg-gray-100 text-gray-800',
+      approved: 'bg-green-100 text-green-800',
+    };
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Handle quantity adjustment
+  const handleAdjustQuantity = async () => {
+    if (!selectedLot || !adjustmentQuantity || !adjustmentReason) {
+      toast({ title: 'Error', description: 'Please fill in all fields', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      // Insert stock movement
+      const { error: movementError } = await supabase
+        .from('stock_movements')
+        .insert({
+          lot_id: selectedLot,
+          movement_type: 'adjust',
+          quantity: parseFloat(adjustmentQuantity),
+          unit_of_measure: lotDetail?.unit_of_measure || 'units',
+          reason: adjustmentReason,
+          performed_by: (await supabase.auth.getUser()).data.user?.id,
+        });
+
+      if (movementError) throw movementError;
+
+      // Update stock level
+      const currentQuantity = getAvailableQuantity(lotDetail as any);
+      const newQuantity = currentQuantity + parseFloat(adjustmentQuantity);
+
+      const { error: stockError } = await supabase
+        .from('stock_levels')
+        .update({ available_quantity: Math.max(0, newQuantity) })
+        .eq('lot_id', selectedLot);
+
+      if (stockError) throw stockError;
+
+      toast({ title: 'Success', description: 'Quantity adjusted successfully' });
+      setAdjustmentDialog(false);
+      setAdjustmentQuantity('');
+      setAdjustmentReason('');
+      refetch();
+    } catch (error) {
+      console.error('Error adjusting quantity:', error);
+      toast({ title: 'Error', description: 'Failed to adjust quantity', variant: 'destructive' });
+    }
+  };
+
+  // Handle quarantine toggle
+  const handleQuarantineToggle = async (lotId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'quarantine' ? 'available' : 'quarantine';
+      
+      // Update lot status
+      const { error: lotError } = await supabase
+        .from('inventory_lots')
+        .update({ status: newStatus })
+        .eq('id', lotId);
+
+      if (lotError) throw lotError;
+
+      // Insert movement record
+      const { error: movementError } = await supabase
+        .from('stock_movements')
+        .insert({
+          lot_id: lotId,
+          movement_type: newStatus === 'quarantine' ? 'quarantine' : 'release',
+          quantity: 0,
+          unit_of_measure: 'units',
+          reason: ${newStatus === 'quarantine' ? 'Placed in' : 'Released from'} quarantine,
+          performed_by: (await supabase.auth.getUser()).data.user?.id,
+        });
+
+      if (movementError) throw movementError;
+
+      toast({ 
+        title: 'Success', 
+        description: Lot ${newStatus === 'quarantine' ? 'quarantined' : 'released'} successfully 
+      });
+      refetch();
+    } catch (error) {
+      console.error('Error updating quarantine status:', error);
+      toast({ title: 'Error', description: 'Failed to update status', variant: 'destructive' });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Inventory</h1>
+          <p className="text-muted-foreground">
+            View and control all lots; only packaged, COA-approved lots are eligible for dispatch
+          </p>
+        </div>
+        <Button variant="outline" className="gap-2">
+          <Download className="h-4 w-4" />
+          Export CSV
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Filters</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                placeholder="Search lots, products, strains..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select value={facilityFilter} onValueChange={setFacilityFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Facilities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Facilities</SelectItem>
+                <SelectItem value="Main Facility">Main Facility</SelectItem>
+                <SelectItem value="Curing Room A">Curing Room A</SelectItem>
+                <SelectItem value="Processing Room">Processing Room</SelectItem>
+                <SelectItem value="Extraction Lab">Extraction Lab</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={productTypeFilter} onValueChange={setProductTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Product Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="flower">Flower</SelectItem>
+                <SelectItem value="trim">Trim</SelectItem>
+                <SelectItem value="oil">Oil</SelectItem>
+                <SelectItem value="packaged">Packaged</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={stageFilter} onValueChange={setStageFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Packaging</SelectItem>
+                <SelectItem value="packaging">Packaging</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="available">Available</SelectItem>
+                <SelectItem value="quarantine">Quarantine</SelectItem>
+                <SelectItem value="expired">Expired</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Inventory Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Inventory Lots ({filteredInventory.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lot Code</TableHead>
+                <TableHead>Product</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Qty (UoM)</TableHead>
+                <TableHead>Facility</TableHead>
+                <TableHead>COA/Test Results</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Expiry</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredInventory.map((lot) => {
+                const availableQty = getAvailableQuantity(lot);
+                return (
+                  <TableRow key={lot.id}>
+                    <TableCell className="font-mono">{lot.lot_code}</TableCell>
+                    <TableCell>
+                      <div>
+                        <div className="font-medium">{lot.product_name}</div>
+                        <div className="text-sm text-muted-foreground">{lot.strain}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={getStageBadge(lot.stage)}>
+                        {lot.stage.charAt(0).toUpperCase() + lot.stage.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {availableQty} {lot.unit_of_measure}
+                    </TableCell>
+                    <TableCell>{lot.facility}</TableCell>
+                    <TableCell>
+                      {lot.coa_approved && lot.coa_records ? (
+                        <div>
+                          <Badge className="bg-green-100 text-green-800 mb-1">Approved</Badge>
+                          <div className="text-xs text-muted-foreground">
+                            THC: {lot.coa_records.thc_percentage}% | CBD: {lot.coa_records.cbd_percentage}%
+                          </div>
+                        </div>
+                      ) : (
+                        <Badge variant="outline">Missing COA</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusBadge(lot.status)}>
+                          {lot.status.charAt(0).toUpperCase() + lot.status.slice(1)}
+                        </Badge>
+                        {isDispatchReady(lot) && (
+                          <Badge className="bg-blue-100 text-blue-800">
+                            <CheckCircle className="h-3 w-3 mr-1" />
+                            Dispatch Ready
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {lot.expiry_date ? (
+                          <>
+                            <span className={`text-sm ${
+                              isExpired(lot.expiry_date) ? 'text-red-600 font-medium' :
+                              isApproachingExpiry(lot.expiry_date) ? 'text-amber-600 font-medium' :
+                              'text-foreground'
+                            }`}>
+                              {new Date(lot.expiry_date).toLocaleDateString()}
+                            </span>
+                            {isExpired(lot.expiry_date) && (
+                              <AlertCircle className="h-4 w-4 text-red-500" />
+                            )}
+                            {isApproachingExpiry(lot.expiry_date) && (
+                              <Clock className="h-4 w-4 text-amber-500" />
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem onClick={() => setSelectedLot(lot.id)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => {
+                            setSelectedLot(lot.id);
+                            setAdjustmentDialog(true);
+                          }}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Adjust Qty
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleQuarantineToggle(lot.id, lot.status)}>
+                            <AlertTriangle className="h-4 w-4 mr-2" />
+                            {lot.status === 'quarantine' ? 'Release' : 'Quarantine'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Lot Detail Sheet */}
+      <Sheet open={selectedLot !== null} onOpenChange={(open) => !open && setSelectedLot(null)}>
+        <SheetContent className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle>Lot Details</SheetTitle>
+          </SheetHeader>
+          
+          {lotDetail && (
+            <div className="space-y-6 mt-6">
+              {/* Overview */}
+              <div className="space-y-4">
+                <h3 className="font-semibold">Overview</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Lot Code:</span>
+                    <div className="font-mono">{lotDetail.lot_code}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Product:</span>
+                    <div>{lotDetail.product_name}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Strain:</span>
+                    <div>{lotDetail.strain}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Stage:</span>
+                    <Badge className={getStageBadge(lotDetail.stage)}>
+                      {lotDetail.stage.charAt(0).toUpperCase() + lotDetail.stage.slice(1)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Status:</span>
+                    <Badge className={getStatusBadge(lotDetail.status)}>
+                      {lotDetail.status.charAt(0).toUpperCase() + lotDetail.status.slice(1)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Facility:</span>
+                    <div>{lotDetail.facility}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expiry Alert */}
+              {lotDetail.expiry_date && (isExpired(lotDetail.expiry_date) || isApproachingExpiry(lotDetail.expiry_date)) && (
+                <Alert className={isExpired(lotDetail.expiry_date) ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50"}>
+                  <AlertCircle className={h-4 w-4 ${isExpired(lotDetail.expiry_date) ? "text-red-600" : "text-amber-600"}} />
+                  <AlertDescription className={isExpired(lotDetail.expiry_date) ? "text-red-800" : "text-amber-800"}>
+                    {isExpired(lotDetail.expiry_date) 
+                      ? This lot expired on ${new Date(lotDetail.expiry_date).toLocaleDateString()} 
+                      : This lot expires on ${new Date(lotDetail.expiry_date).toLocaleDateString()} (${Math.ceil((new Date(lotDetail.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days)
+                    }
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Tabs for detailed info */}
+              <Tabs defaultValue="movements" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="movements">Movements</TabsTrigger>
+                  <TabsTrigger value="batch">Batch History</TabsTrigger>
+                  <TabsTrigger value="compliance">Compliance</TabsTrigger>
+                  <TabsTrigger value="dispatches">Dispatches</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="movements" className="space-y-4">
+                  <h4 className="font-medium">Movement History</h4>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {movements.map((movement) => (
+                      <div key={movement.id} className="p-3 bg-muted rounded-lg text-sm">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <span className="font-medium capitalize">{movement.movement_type}</span>
+                            <div className="text-muted-foreground">
+                              {movement.quantity > 0 && ${movement.quantity} ${movement.unit_of_measure}}
+                            </div>
+                            {movement.reason && (
+                              <div className="text-muted-foreground">{movement.reason}</div>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(movement.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="batch" className="space-y-4">
+                  <h4 className="font-medium">Batch Traceability</h4>
+                  
+                  {batchInfo && (
+                    <div className="space-y-4">
+                      {/* Batch Overview */}
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h5 className="font-medium">{batchInfo.name}</h5>
+                          <Badge variant="outline">{batchInfo.current_stage}</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                          <div>Strain: {batchInfo.strain}</div>
+                          <div>Plant Count: {batchInfo.plant_count}</div>
+                          <div>Start Date: {new Date(batchInfo.start_date).toLocaleDateString()}</div>
+                          <div>Progress: {batchInfo.progress}%</div>
+                        </div>
+                      </div>
+
+                      {/* Stage Progression */}
+                      <div>
+                        <h6 className="font-medium mb-2">Stage Progression</h6>
+                        <div className="space-y-2">
+                          {batchStages.map((stage) => (
+                            <div key={stage.id} className="flex items-center justify-between p-2 border rounded">
+                              <div className="flex items-center gap-2">
+                                <Badge variant={stage.status === 'completed' ? 'default' : 
+                                              stage.status === 'active' ? 'secondary' : 'outline'}>
+                                  {stage.stage_name}
+                                </Badge>
+                                {stage.stage_weight && (
+                                  <span className="text-sm text-muted-foreground">
+                                    {stage.stage_weight}g
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {stage.completed_at 
+                                  ? Completed ${new Date(stage.completed_at).toLocaleDateString()}
+                                  : stage.started_at 
+                                  ? Started ${new Date(stage.started_at).toLocaleDateString()}
+                                  : 'Pending'
+                                }
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Recent Daily Logs */}
+                      <div>
+                        <h6 className="font-medium mb-2">Recent Daily Logs</h6>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {dailyLogs.map((log) => (
+                            <div key={log.id} className="p-2 bg-background border rounded text-sm">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="font-medium">
+                                    {new Date(log.date).toLocaleDateString()} - {log.stage}
+                                  </div>
+                                  {(log.temperature || log.humidity) && (
+                                    <div className="text-muted-foreground">
+                                      {log.temperature && ${log.temperature}°C}
+                                      {log.temperature && log.humidity && ' | '}
+                                      {log.humidity && ${log.humidity}% RH}
+                                    </div>
+                                  )}
+                                  {log.plant_count && (
+                                    <div className="text-muted-foreground">
+                                      Plants: {log.plant_count}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {log.observations && (
+                                <div className="text-muted-foreground mt-1 text-xs">
+                                  {log.observations}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="compliance" className="space-y-4">
+                  <h4 className="font-medium">COA Information</h4>
+                  {lotDetail.coa_records ? (
+                    <div className="space-y-2">
+                      <div className="p-3 bg-green-50 rounded-lg">
+                        <div className="font-medium text-green-800">COA Approved</div>
+                        <div className="text-sm text-green-600">
+                          Lab: {lotDetail.coa_records.lab_name}
+                        </div>
+                        <div className="text-sm text-green-600">
+                          Test Date: {new Date(lotDetail.coa_records.test_date).toLocaleDateString()}
+                        </div>
+                        <div className="text-sm text-green-600">
+                          THC: {lotDetail.coa_records.thc_percentage}% | CBD: {lotDetail.coa_records.cbd_percentage}%
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-amber-50 rounded-lg">
+                      <div className="font-medium text-amber-800">No COA Available</div>
+                      <div className="text-sm text-amber-600">
+                        COA testing required for dispatch eligibility
+                      </div>
+                    </div>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="dispatches" className="space-y-4">
+                  <h4 className="font-medium">Dispatch History</h4>
+                  <div className="text-sm text-muted-foreground">
+                    No dispatch records found for this lot.
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {/* Actions */}
+              <div className="flex gap-2 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setAdjustmentDialog(true)}
+                >
+                  Adjust Qty
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleQuarantineToggle(lotDetail.id, lotDetail.status)}
+                >
+                  {lotDetail.status === 'quarantine' ? 'Release' : 'Quarantine'}
+                </Button>
+                <Button variant="outline" size="sm">
+                  Print Label
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Adjustment Dialog */}
+      <Dialog open={adjustmentDialog} onOpenChange={setAdjustmentDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adjust Quantity</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="quantity">Quantity Adjustment</Label>
+              <Input
+                id="quantity"
+                type="number"
+                placeholder="Enter adjustment (+ or -)"
+                value={adjustmentQuantity}
+                onChange={(e) => setAdjustmentQuantity(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use positive numbers to add stock, negative to remove
+              </p>
+            </div>
+            <div>
+              <Label htmlFor="reason">Reason</Label>
+              <Textarea
+                id="reason"
+                placeholder="Reason for adjustment (e.g., audit, spoilage, correction)"
+                value={adjustmentReason}
+                onChange={(e) => setAdjustmentReason(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setAdjustmentDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAdjustQuantity}>
+                Adjust Quantity
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Inventory; and heres the table schema: create table public.inventory (
+  id uuid not null default gen_random_uuid (),
+  product_id uuid null,
+  location_id uuid null,
+  qty numeric(10, 3) null default 0,
+  par_level numeric(10, 3) null default 0,
+  expiry_date date null,
+  batch_number text null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint inventory_pkey primary key (id),
+  constraint inventory_product_id_location_id_batch_number_key unique (product_id, location_id, batch_number),
+  constraint inventory_product_id_fkey foreign KEY (product_id) references products (id) on delete CASCADE
+) TABLESPACE pg_default;create table public.finished_goods_inventory (
+  id uuid not null default gen_random_uuid (),
+  product_name text not null,
+  strain text not null,
+  batch_id uuid null,
+  quantity_available numeric not null default 0,
+  quantity_reserved numeric not null default 0,
+  unit_type text not null default 'grams'::text,
+  thc_percentage numeric null,
+  cbd_percentage numeric null,
+  package_date date null,
+  expiry_date date null,
+  qa_status text not null default 'pending'::text,
+  coa_id uuid null,
+  storage_location text null,
+  created_by uuid not null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  cost_per_gram numeric(10, 2) null,
+  price_per_gram numeric(10, 2) null,
+  total_cost numeric(10, 2) null,
+  production_cost numeric(10, 2) null,
+  quarantine_status text null default 'quarantined'::text,
+  constraint finished_goods_inventory_pkey primary key (id),
+  constraint finished_goods_inventory_batch_id_fkey foreign KEY (batch_id) references batches (id),
+  constraint finished_goods_inventory_coa_id_fkey foreign KEY (coa_id) references coa_records (id),
+  constraint finished_goods_inventory_qa_status_check check (
+    (
+      qa_status = any (
+        array[
+          'pending'::text,
+          'approved'::text,
+          'rejected'::text
+        ]
+      )
+    )
+  ),
+  constraint finished_goods_inventory_quarantine_status_check check (
+    (
+      quarantine_status = any (
+        array[
+          'quarantined'::text,
+          'released'::text,
+          'rejected'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create trigger trigger_finished_goods_compliance
+after INSERT
+or
+update on finished_goods_inventory for EACH row
+execute FUNCTION log_finished_goods_compliance ();
+
+create trigger update_finished_goods_inventory_updated_at BEFORE
+update on finished_goods_inventory for EACH row
+execute FUNCTION update_updated_at_column ();create table public.inventory_adjustments (
+  id uuid not null default gen_random_uuid (),
+  product_id uuid null,
+  user_id uuid null,
+  qty_change numeric(10, 3) not null,
+  reason text not null,
+  batch_number text null,
+  timestamp timestamp with time zone null default now(),
+  constraint inventory_adjustments_pkey primary key (id),
+  constraint inventory_adjustments_product_id_fkey foreign KEY (product_id) references products (id),
+  constraint inventory_adjustments_user_id_fkey foreign KEY (user_id) references users (id)
+) TABLESPACE pg_default;create table public.inventory_lots (
+  id uuid not null default gen_random_uuid (),
+  lot_code text not null,
+  batch_id uuid null,
+  product_type text not null,
+  product_name text not null,
+  strain text not null,
+  stage text not null,
+  status text not null default 'available'::text,
+  facility text not null,
+  quantity numeric not null default 0,
+  unit_of_measure text not null default 'grams'::text,
+  expiry_date date null,
+  coa_approved boolean null default false,
+  coa_record_id uuid null,
+  created_by uuid not null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint inventory_lots_pkey primary key (id),
+  constraint inventory_lots_lot_code_key unique (lot_code),
+  constraint inventory_lots_coa_record_id_fkey foreign KEY (coa_record_id) references coa_records (id),
+  constraint inventory_lots_batch_id_fkey foreign KEY (batch_id) references batches (id) on delete CASCADE,
+  constraint inventory_lots_status_check check (
+    (
+      status = any (
+        array[
+          'available'::text,
+          'quarantine'::text,
+          'expired'::text,
+          'approved'::text
+        ]
+      )
+    )
+  ),
+  constraint inventory_lots_unit_of_measure_check check (
+    (
+      unit_of_measure = any (
+        array[
+          'grams'::text,
+          'kilograms'::text,
+          'ounces'::text,
+          'pounds'::text,
+          'units'::text
+        ]
+      )
+    )
+  ),
+  constraint inventory_lots_product_type_check check (
+    (
+      product_type = any (
+        array[
+          'flower'::text,
+          'trim'::text,
+          'oil'::text,
+          'packaged'::text
+        ]
+      )
+    )
+  ),
+  constraint inventory_lots_quantity_check check ((quantity >= (0)::numeric)),
+  constraint inventory_lots_stage_check check (
+    (
+      stage = any (
+        array['harvest'::text, 'cure'::text, 'packaging'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_inventory_lots_batch_id on public.inventory_lots using btree (batch_id) TABLESPACE pg_default;
+
+create index IF not exists idx_inventory_lots_stage_status on public.inventory_lots using btree (stage, status) TABLESPACE pg_default;
+
+create index IF not exists idx_inventory_lots_facility on public.inventory_lots using btree (facility) TABLESPACE pg_default;
+
+create trigger update_inventory_lots_updated_at BEFORE
+update on inventory_lots for EACH row
+execute FUNCTION update_updated_at_inventory ();create table public.ppe_inventory (
+  id uuid not null default gen_random_uuid (),
+  ppe_id text not null,
+  ppe_type text not null,
+  size text null,
+  quantity_in_stock integer not null default 0,
+  reorder_level integer not null default 10,
+  supplier_id uuid null,
+  linked_batch_ids uuid[] null default '{}'::uuid[],
+  unit_cost numeric(10, 2) null,
+  expiry_date date null,
+  created_by uuid not null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  constraint ppe_inventory_pkey primary key (id),
+  constraint ppe_inventory_ppe_id_key unique (ppe_id),
+  constraint ppe_inventory_ppe_type_check check (
+    (
+      ppe_type = any (
+        array[
+          'gloves'::text,
+          'masks'::text,
+          'hair_net'::text,
+          'beard_cover'::text,
+          'lab_coat'::text,
+          'shoe_covers'::text,
+          'safety_glasses'::text,
+          'respirator'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create trigger update_ppe_inventory_updated_at BEFORE
+update on ppe_inventory for EACH row
+execute FUNCTION update_updated_at_column ();
+
+Now your job is to check the frontend and create all the APIs needed based on the tables, if some tables are extra and not needed, ignore them

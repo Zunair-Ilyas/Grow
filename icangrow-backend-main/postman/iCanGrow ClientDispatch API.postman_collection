@@ -1,0 +1,330 @@
+{
+	"info": {
+		"_postman_id": "e1e1c66c-1121-407b-9af6-83a68e88ac6e",
+		"name": "iCanGrow ERP API",
+		"description": "Complete ERP API endpoints for iCanGrow cannabis cultivation management system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36932145",
+		"_collection_link": "https://coding-nerds.postman.co/workspace/Coding-Nerds-Workspace~1975c0d8-79b4-4ffa-8b16-26da52308d1f/collection/19087603-e1e1c66c-1121-407b-9af6-83a68e88ac6e?action=share&source=collection_link&creator=36932145"
+	},
+	"item": [
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "Get All Clients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/clients",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Clients Stats",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/clients/stats",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"clients",
+								"stats"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Client",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"phone\": \"+1-555-123-4567\",\r\n  \"company\": \"Doe Enterprises\",\r\n  \"address\": \"123 Main St, Springfield, IL\",\r\n  \"license_number\": \"LIC-123456\",\r\n  \"client_type\": \"retailer\",\r\n  \"status\": \"active\",\r\n  \"notes\": \"First contact at trade show.\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/clients",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"clients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete a Client",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"email\": \"john.doe@example.com\",\r\n  \"phone\": \"+1-555-123-4567\",\r\n  \"company\": \"Doe Enterprises\",\r\n  \"address\": \"123 Main St, Springfield, IL\",\r\n  \"license_number\": \"LIC-123456\",\r\n  \"client_type\": \"retailer\",\r\n  \"status\": \"active\",\r\n  \"notes\": \"First contact at trade show.\"\r\n}"
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/clients/:id",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"clients",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "edddf1f3-94bd-41d1-85ec-dd691d7bfa0b"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Archive a Client",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/clients/:id/archive",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"clients",
+								":id",
+								"archive"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "33333333-3333-3333-3333-333333333333"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Dispatch",
+			"item": [
+				{
+					"name": "Get All Dispatches",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/dispatches",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dispatches"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get a Single Dispatch",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/dispatches/:id",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dispatches",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "63bfaf0c-3a5f-4f06-8770-39aee96bb062"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a New Dispatch",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"client_id\": \"33333333-3333-3333-3333-333333333333\",\r\n  \"origin_facility\": \"Facility A\",\r\n  \"carrier\": \"Carrier Name\",\r\n  \"driver_name\": \"John Doe\",\r\n  \"vehicle_info\": \"Truck Model XYZ\",\r\n  \"license_plate\": \"ABC-123\",\r\n  \"notes\": \"Urgent delivery\",\r\n  \"items\": [\r\n    {\r\n      \"lot_id\": \"aaaa1111-1111-1111-1111-111111111111\",\r\n      \"quantity\": 10,\r\n      \"available_at_selection\": 5\r\n    },\r\n    {\r\n      \"lot_id\": \"27022aee-f16e-4a21-a558-ce433f5bdb77\",\r\n      \"quantity\": 20\r\n    }\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/dispatches",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dispatches"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm a Dispatch",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"client_id\": \"33333333-3333-3333-3333-333333333333\",\r\n  \"driver_id\": \"67890\",\r\n  \"pickup_location\": \"123 Main St, City\",\r\n  \"dropoff_location\": \"456 Elm St, City\",\r\n  \"scheduled_time\": \"2024-07-01T10:00:00Z\",\r\n  \"notes\": \"Handle with care\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/v1/dispatches/:id/confirm",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dispatches",
+								":id",
+								"confirm"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b06e3bff-b7a3-4ded-8b8f-f43460df4431"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Deliver a Dispatch",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/dispatches/:id/deliver",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"dispatches",
+								":id",
+								"deliver"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "b06e3bff-b7a3-4ded-8b8f-f43460df4431"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{access_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-refresh token if needed",
+					"if (!pm.environment.get('access_token')) {",
+					"    console.log('No access token found. Please login first.');",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script for ERP endpoints",
+					"pm.test('Response time is less than 5000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has success field', function () {",
+					"    const jsonData = pm.response.json();",
+					"    pm.expect(jsonData).to.have.property('success');",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

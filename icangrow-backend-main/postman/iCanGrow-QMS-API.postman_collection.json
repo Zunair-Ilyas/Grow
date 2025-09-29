@@ -1,0 +1,1735 @@
+{
+    "info": {
+        "_postman_id": "qms-api-collection",
+        "name": "iCanGrow QMS API",
+        "description": "Quality Management System API endpoints for cannabis cultivation compliance",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "SOP Control",
+            "item": [
+                {
+                    "name": "List SOPs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops?page=1&limit=20&status=approved",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "category",
+                                    "value": "safety",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "approved",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "search term",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create SOP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Cultivation Safety Procedures\",\n  \"sop_number\": \"SOP-001\",\n  \"category\": \"safety\",\n  \"description\": \"Standard operating procedures for cultivation safety\",\n  \"version\": \"1.0\",\n  \"content\": \"Detailed safety procedures for cultivation operations\",\n  \"effective_date\": \"2024-01-01\",\n  \"review_date\": \"2024-12-31\",\n  \"status\": \"draft\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data && response.data.id) {",
+                                    "        pm.environment.set('sop_id', response.data.id);",
+                                    "        console.log('SOP ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get SOP",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops/{{sop_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops",
+                                "{{sop_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update SOP",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated Cultivation Safety Procedures\",\n  \"version\": \"1.1\",\n  \"content\": \"Updated safety procedures with new guidelines\",\n  \"status\": \"review\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops/{{sop_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops",
+                                "{{sop_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve SOP",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops/{{sop_id}}/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops",
+                                "{{sop_id}}",
+                                "approve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get SOPs by Category",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops/category/safety",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops",
+                                "category",
+                                "safety"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get SOP Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/sops/categories/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "sops",
+                                "categories",
+                                "list"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Training & Competency",
+            "item": [
+                {
+                    "name": "List Training Records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training?page=1&limit=20&status=completed",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "user_id",
+                                    "value": "{{user_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "training_type",
+                                    "value": "safety",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "completed",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sop_id",
+                                    "value": "{{document_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "search term",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Assign Training",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"user_id\": \"{{user_id}}\",\n  \"sop_id\": \"{{sop_id}}\",\n  \"training_type\": \"safety\",\n  \"title\": \"Safety Training - Equipment Handling\",\n  \"trainer_id\": \"{{trainer_id}}\",\n  \"expiry_date\": \"2024-12-31\",\n  \"notes\": \"Mandatory safety training for all cultivation staff\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training"
+                            ]
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data && response.data.id) {",
+                                    "        pm.environment.set('training_id', response.data.id);",
+                                    "        console.log('Training ID saved:', response.data.id);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Training Record",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/{{training_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "{{training_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Training Record",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"in_progress\",\n  \"completion_date\": \"2024-01-15\",\n  \"score\": 95,\n  \"certificate_url\": \"https://example.com/certificate.pdf\",\n  \"notes\": \"Training completed successfully\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/{{training_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "{{training_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Training Complete",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"completion_date\": \"2024-01-15\",\n  \"score\": 95,\n  \"certificate_url\": \"https://example.com/certificate.pdf\",\n  \"notes\": \"Training completed successfully\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/{{training_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "{{training_id}}",
+                                "complete"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User Training Records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/user/{{user_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "user",
+                                "{{user_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Users List",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/users/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "users",
+                                "list"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get SOPs List",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/training/sops/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "training",
+                                "sops",
+                                "list"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Deviations",
+            "item": [
+                {
+                    "name": "List Deviations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations?page=1&limit=20&status=open",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "assignee",
+                                    "value": "{{user_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "severity",
+                                    "value": "high",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "open",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "search term",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Log Deviation",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Temperature Deviation in Room A\",\n  \"description\": \"Temperature exceeded acceptable range for 2 hours\",\n  \"batch_id\": \"{{batch_id}}\",\n  \"occurred_at\": \"2024-01-15\",\n  \"assignee\": \"{{user_id}}\",\n  \"severity\": \"medium\",\n  \"status\": \"open\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Deviation",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations/{{deviation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations",
+                                "{{deviation_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Deviation",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"in_progress\",\n  \"assignee\": \"{{user_id}}\",\n  \"corrective_action\": \"Adjusted HVAC settings\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations/{{deviation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations",
+                                "{{deviation_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resolve Deviation",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"corrective_action\": \"HVAC system recalibrated and temperature monitoring enhanced\",\n  \"preventive_action\": \"Added backup temperature sensors and alarm system\",\n  \"resolved_at\": \"2024-01-16\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations/{{deviation_id}}/resolve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations",
+                                "{{deviation_id}}",
+                                "resolve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Batch Deviations",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/deviations/batch/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "deviations",
+                                "batch",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "CAPAs",
+            "item": [
+                {
+                    "name": "List CAPAs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas?page=1&limit=20&status=open",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "deviation_id",
+                                    "value": "{{deviation_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "assignee",
+                                    "value": "{{user_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "action_type",
+                                    "value": "corrective",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "priority",
+                                    "value": "high",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "open",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "search term",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add CAPA",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"HVAC System Enhancement\",\n  \"description\": \"Implement backup temperature monitoring system\",\n  \"deviation_id\": \"{{deviation_id}}\",\n  \"action_type\": \"corrective\",\n  \"assignee\": \"{{user_id}}\",\n  \"due_date\": \"2024-02-15\",\n  \"priority\": \"high\",\n  \"status\": \"open\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get CAPA",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas/{{capa_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas",
+                                "{{capa_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update CAPA",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"status\": \"in_progress\",\n  \"assignee\": \"{{user_id}}\",\n  \"due_date\": \"2024-02-20\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas/{{capa_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas",
+                                "{{capa_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Complete CAPA",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"completion_date\": \"2024-02-10\",\n  \"effectiveness_review\": \"System tested and functioning properly. No further temperature deviations observed.\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas/{{capa_id}}/complete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas",
+                                "{{capa_id}}",
+                                "complete"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Deviation CAPAs",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/capas/deviation/{{deviation_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "capas",
+                                "deviation",
+                                "{{deviation_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Environmental Monitoring",
+            "item": [
+                {
+                    "name": "List Environmental Readings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/environment?page=1&limit=20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "environment"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "room_name",
+                                    "value": "Room A",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "normal",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_from",
+                                    "value": "2024-01-01",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2024-01-31",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Batch Environmental Readings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/environment/batch/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "environment",
+                                "batch",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Room Environmental Readings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/environment/room/Room%20A",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "environment",
+                                "room",
+                                "Room A"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Environmental Summary",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/environment/summary?date_from=2024-01-01&date_to=2024-01-31&room_name=Room%20A",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "environment",
+                                "summary"
+                            ],
+                            "query": [
+                                {
+                                    "key": "date_from",
+                                    "value": "2024-01-01"
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2024-01-31"
+                                },
+                                {
+                                    "key": "room_name",
+                                    "value": "Room A",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Electronic Batch Records (eBR)",
+            "item": [
+                {
+                    "name": "List eBR Records",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr?page=1&limit=20",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                },
+                                {
+                                    "key": "batch_id",
+                                    "value": "{{batch_id}}",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "compliance_status",
+                                    "value": "compliant",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "pass_fail_status",
+                                    "value": "pass",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_from",
+                                    "value": "2024-01-01",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "date_to",
+                                    "value": "2024-01-31",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "q",
+                                    "value": "search term",
+                                    "disabled": true
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get eBR Record",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Batch eBR Record",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/batch/{{batch_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "batch",
+                                "{{batch_id}}"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get eBR Checklist",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/checklist",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "checklist"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get eBR Signatures",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/signatures",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "signatures"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get eBR Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/details",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "details"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get eBR Statistics",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/statistics/overview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "statistics",
+                                "overview"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create eBR Record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"batch_id\": \"{{batch_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Approve eBR Record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"approval_reason\": \"All compliance requirements met, batch approved for release\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/approve",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "approve"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reject eBR Record",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rejection_reason\": \"Critical deviations found in environmental monitoring data\",\n  \"requires_reprocessing\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "reject"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Add eBR Checklist Item",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"checklist_item\": \"Verify batch documentation completeness\",\n  \"item_category\": \"documentation\",\n  \"is_compliant\": true,\n  \"comments\": \"All required documents are present and properly filled\",\n  \"evidence_urls\": [\"https://example.com/doc1.pdf\", \"https://example.com/doc2.pdf\"]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/{{ebr_id}}/checklist",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "{{ebr_id}}",
+                                "checklist"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update eBR Checklist Item",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"is_compliant\": true,\n  \"comments\": \"Updated after additional review\",\n  \"reviewed_at\": \"2024-01-20T10:30:00Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/qms/ebr/checklist/{{checklist_item_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "qms",
+                                "ebr",
+                                "checklist",
+                                "{{checklist_item_id}}"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-refresh token if needed",
+                    "if (!pm.environment.get('access_token')) {",
+                    "    console.log('No access token found. Please authenticate first.');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-save IDs from responses",
+                    "if (pm.response.code === 200 || pm.response.code === 201) {",
+                    "    const response = pm.response.json();",
+                    "    ",
+                    "    // Save SOP ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('sops')) {",
+                    "        pm.environment.set('sop_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save training ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('training')) {",
+                    "        pm.environment.set('training_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save deviation ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('deviations')) {",
+                    "        pm.environment.set('deviation_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save CAPA ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('capas')) {",
+                    "        pm.environment.set('capa_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save eBR ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('ebr')) {",
+                    "        pm.environment.set('ebr_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save checklist item ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('checklist')) {",
+                    "        pm.environment.set('checklist_item_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save assignment ID",
+                    "    if (response.data && response.data.id && pm.request.url.path.includes('training-assignments')) {",
+                    "        pm.environment.set('assignment_id', response.data.id);",
+                    "    }",
+                    "    ",
+                    "    // Save training program ID",
+                    "    if (response.data && response.data.training_program_id) {",
+                    "        pm.environment.set('training_program_id', response.data.training_program_id);",
+                    "    }",
+                    "    ",
+                    "    // Save user ID from user data",
+                    "    if (response.data && response.data.user_id) {",
+                    "        pm.environment.set('user_id', response.data.user_id);",
+                    "    }",
+                    "    ",
+                    "    // Save batch ID from batch data",
+                    "    if (response.data && response.data.batch_id) {",
+                    "        pm.environment.set('batch_id', response.data.batch_id);",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "document_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "training_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "deviation_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "capa_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "ebr_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "batch_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "trainer_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "assignment_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "training_program_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

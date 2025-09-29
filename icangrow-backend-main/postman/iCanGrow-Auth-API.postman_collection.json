@@ -1,0 +1,515 @@
+{
+    "info": {
+        "_postman_id": "icangrow-auth-api",
+        "name": "iCanGrow Auth API",
+        "description": "Complete authentication API collection for iCanGrow cannabis cultivation management system",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if the server is running"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User Signup",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Auto-capture user info after successful signup",
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('user_id', response.data.user.id);",
+                                    "        pm.environment.set('user_email', response.data.user.email);",
+                                    "        ",
+                                    "        console.log('✅ Signup successful!');",
+                                    "        console.log('User ID:', response.data.user.id);",
+                                    "        console.log('User Role:', response.data.user.role);",
+                                    "        console.log('Email Verified:', response.data.user.emailVerified);",
+                                    "        ",
+                                    "        // Check if this was a resend verification case",
+                                    "        if (response.data.message === 'verification_resent') {",
+                                    "            console.log('📧 Verification email resent to existing unverified user');",
+                                    "            console.log('💡 Please check your email for the new verification link');",
+                                    "        } else {",
+                                    "            console.log('📧 New user registered - please check your email to verify');",
+                                    "        }",
+                                    "        ",
+                                    "        console.log('💡 After verification, use the Login endpoint to get tokens');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123\",\n  \"confirmPassword\": \"SecurePass123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/signup",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "signup"
+                            ]
+                        },
+                        "description": "Register a new user account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "User Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Auto-capture tokens after successful login",
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('access_token', response.data.accessToken);",
+                                    "        pm.environment.set('refresh_token', response.data.refreshToken);",
+                                    "        pm.environment.set('user_id', response.data.user.id);",
+                                    "        pm.environment.set('user_email', response.data.user.email);",
+                                    "        ",
+                                    "        console.log('✅ Login successful! Tokens automatically set!');",
+                                    "        console.log('User ID:', response.data.user.id);",
+                                    "        console.log('User Role:', response.data.user.role);",
+                                    "        console.log('Email Verified:', response.data.user.emailVerified);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{user_email}}\",\n  \"password\": \"SecurePass123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate user and get access tokens"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "// Auto-update tokens after successful refresh",
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('access_token', response.data.accessToken);",
+                                    "        pm.environment.set('refresh_token', response.data.refreshToken);",
+                                    "        ",
+                                    "        console.log('✅ Tokens refreshed successfully!');",
+                                    "        console.log('New access token set');",
+                                    "        console.log('New refresh token set');",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh access token using refresh token"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"token\": \"verification_token_from_email\",\n  \"type\": \"signup\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/verify-email",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "verify-email"
+                            ]
+                        },
+                        "description": "Verify user email address"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Resend Verification Email",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/resend-verification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "resend-verification"
+                            ]
+                        },
+                        "description": "Resend email verification link"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"john@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/forgot-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "forgot-password"
+                            ]
+                        },
+                        "description": "Send password reset email"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"token\": \"reset_token_from_email\",\n  \"password\": \"NewSecurePass123\",\n  \"confirmPassword\": \"NewSecurePass123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/reset-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "reset-password"
+                            ]
+                        },
+                        "description": "Reset password using token from email"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Change Password",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"SecurePass123\",\n  \"newPassword\": \"NewSecurePass123\",\n  \"confirmNewPassword\": \"NewSecurePass123\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/change-password",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "change-password"
+                            ]
+                        },
+                        "description": "Change user password (requires authentication)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get current user profile information"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{access_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout user and invalidate session"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication endpoints for user management"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Auto-refresh token if needed (runs before each request)",
+                    "const accessToken = pm.environment.get('access_token');",
+                    "const refreshToken = pm.environment.get('refresh_token');",
+                    "",
+                    "// Only try to refresh if we have both tokens and this is an authenticated request",
+                    "if (accessToken && refreshToken && pm.request.headers.has('Authorization')) {",
+                    "    try {",
+                    "        // Decode JWT to check expiration (basic check)",
+                    "        const tokenParts = accessToken.split('.');",
+                    "        if (tokenParts.length === 3) {",
+                    "            const payload = JSON.parse(atob(tokenParts[1]));",
+                    "            const currentTime = Math.floor(Date.now() / 1000);",
+                    "            ",
+                    "            // If token expires in next 5 minutes, refresh it",
+                    "            if (payload.exp && (payload.exp - currentTime) < 300) {",
+                    "                console.log('🔄 Access token expires soon, refreshing...');",
+                    "                ",
+                    "                // Make refresh request",
+                    "                pm.sendRequest({",
+                    "                    url: pm.environment.get('base_url') + '/api/v1/auth/refresh',",
+                    "                    method: 'POST',",
+                    "                    header: {",
+                    "                        'Content-Type': 'application/json'",
+                    "                    },",
+                    "                    body: {",
+                    "                        mode: 'raw',",
+                    "                        raw: JSON.stringify({ refreshToken: refreshToken })",
+                    "                    }",
+                    "                }, function (err, response) {",
+                    "                    if (!err && response.code === 200) {",
+                    "                        const refreshResponse = response.json();",
+                    "                        if (refreshResponse.success && refreshResponse.data) {",
+                    "                            pm.environment.set('access_token', refreshResponse.data.accessToken);",
+                    "                            pm.environment.set('refresh_token', refreshResponse.data.refreshToken);",
+                    "                            console.log('✅ Token auto-refreshed successfully!');",
+                    "                        }",
+                    "                    } else {",
+                    "                        console.log('❌ Token refresh failed:', err || response.json());",
+                    "                    }",
+                    "                });",
+                    "            }",
+                    "        }",
+                    "    } catch (e) {",
+                    "        console.log('Token validation error:', e);",
+                    "    }",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test script - runs after each request",
+                    "",
+                    "// Log response status",
+                    "console.log('Response Status:', pm.response.code, pm.response.status);",
+                    "",
+                    "// Check for common error patterns",
+                    "if (pm.response.code === 401) {",
+                    "    console.log('🔒 Unauthorized - Token may be expired or invalid');",
+                    "    console.log('💡 Try running \"Refresh Token\" request manually');",
+                    "} else if (pm.response.code === 403) {",
+                    "    console.log('🚫 Forbidden - Insufficient permissions');",
+                    "} else if (pm.response.code >= 400) {",
+                    "    console.log('❌ Error response received');",
+                    "    try {",
+                    "        const errorResponse = pm.response.json();",
+                    "        if (errorResponse.error) {",
+                    "            console.log('Error:', errorResponse.error);",
+                    "        }",
+                    "    } catch (e) {",
+                    "        console.log('Could not parse error response');",
+                    "    }",
+                    "} else if (pm.response.code >= 200 && pm.response.code < 300) {",
+                    "    console.log('✅ Request successful');",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3000",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}

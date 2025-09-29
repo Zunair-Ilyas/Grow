@@ -1,0 +1,144 @@
+{
+  "info": {
+    "name": "iCanGrow Purchase Orders API",
+    "description": "Collection for testing purchase order management APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "poId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "List Purchase Orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders?searchTerm=&status=all&supplier_id=all&priority=all",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders"],
+          "query": [
+            { "key": "searchTerm", "value": "" },
+            { "key": "status", "value": "all" },
+            { "key": "supplier_id", "value": "all" },
+            { "key": "priority", "value": "all" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Purchase Order Details",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders/{{poId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders", "{{poId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get Purchase Order Items",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders/{{poId}}/items",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders", "{{poId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "Create Purchase Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"po\": {\n    \"supplier_id\": \"supplier-uuid\",\n    \"expected_delivery_date\": \"2024-09-15\",\n    \"priority\": \"high\",\n    \"delivery_address\": \"123 Main St\",\n    \"delivery_instructions\": \"Call reception\",\n    \"payment_terms\": \"Net 30\",\n    \"notes\": \"Urgent order\",\n    \"subtotal\": 1000,\n    \"vat_amount\": 150,\n    \"vat_percentage\": 15,\n    \"total_amount\": 1150,\n    \"store_id\": \"main-store\"\n  },\n  \"items\": [\n    {\n      \"product_name\": \"LED Grow Light\",\n      \"description\": \"Full spectrum\",\n      \"quantity\": 10,\n      \"unit_price\": 100,\n      \"total_price\": 1000,\n      \"unit_of_measure\": \"units\"\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders"]
+        }
+      }
+    },
+    {
+      "name": "Update Purchase Order",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"priority\": \"medium\",\n  \"notes\": \"Updated notes\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders/{{poId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders", "{{poId}}"]
+        }
+      }
+    },
+    {
+      "name": "Approve Purchase Order",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders/{{poId}}/approve",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders", "{{poId}}", "approve"]
+        }
+      }
+    },
+    {
+      "name": "Mark Purchase Order Delivered",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/purchase-orders/{{poId}}/deliver",
+          "host": ["{{baseUrl}}"],
+          "path": ["purchase-orders", "{{poId}}", "deliver"]
+        }
+      }
+    }
+  ]
+}
+
